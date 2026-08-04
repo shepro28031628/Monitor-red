@@ -60,7 +60,7 @@ function validateEnv(): MikrotikConfig {
   const missing: string[] = [];
   if (!host) missing.push("MIKROTIK_HOST");
   if (!user) missing.push("MIKROTIK_USER");
-  if (!password) missing.push("MIKROTIK_PASSWORD");
+  if (password === undefined) missing.push("MIKROTIK_PASSWORD");
 
   if (missing.length > 0) {
     logError(`Faltan variables de entorno: ${missing.join(", ")}.`);
