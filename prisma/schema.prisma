@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String
+  name      String?
+  role      String    @default("USER")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sessions  Session[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model RouterStat {
+  id                  Int      @id @default(autoincrement())
+  createdAt           DateTime @default(now())
+  cpuLoad             Int?
+  freeMemory          BigInt?
+  totalMemory         BigInt?
+  hddFree             BigInt?
+  hddTotal            BigInt?
+  temperature         Int?
+  voltage             Decimal? @db.Decimal(5, 2)
+  uptime              String?  @db.VarChar(50)
+  dhcpLeases          Int?
+  queueCount          Int?
+  wanDrops            Int?
+  logMessage          String?  @db.Text
+  wan1Tx              BigInt?
+  wan1Rx              BigInt?
+  wan2Tx              BigInt?
+  wan2Rx              BigInt?
+  wan1Ip              String?  @db.VarChar(50)
+  wan1Status          String?  @db.VarChar(20)
+  wan2Ip              String?  @db.VarChar(50)
+  wan2Status          String?  @db.VarChar(20)
+  vpnCount            Int?
+  pingAvgMs           Decimal? @db.Decimal(8, 2)
+  pingLossPercent     Int?
+  vpnProfilesDetail   Json?
+  topConsumers        Json?
+  activeConnections   Int?
+
+  @@index([createdAt])
+}
+
+model SystemAlert {
+  id          Int       @id @default(autoincrement())
+  alertType   String?   @db.VarChar(50)
+  severity    String?   @db.VarChar(20)
+  message     String?   @db.Text
+  createdAt   DateTime  @default(now())
+  resolvedAt  DateTime?
+}
+
+model SpeedHistory {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  downloadMbps  Decimal? @db.Decimal(8, 2)
+  uploadMbps    Decimal? @db.Decimal(8, 2)
+  pingMs        Decimal? @db.Decimal(8, 2)
+  isp           String?  @db.VarChar(100)
+}
+
+model DeviceInventory {
+  id          Int      @id @default(autoincrement())
+  macAddress  String   @unique @db.VarChar(20)
+  ipAddress   String?  @db.VarChar(20)
+  hostname    String?  @db.VarChar(100)
+  vendor      String?  @db.VarChar(100)
+  owner       String?  @db.VarChar(150)
+  isOnline    Boolean?
+  firstSeen   DateTime
+  lastSeen    DateTime
+}
+
+model NetworkLog {
+  id          BigInt   @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  topic       String?  @db.VarChar(50)
+  message     String?  @db.Text
+  severity    String?  @db.VarChar(20)
+}
+
+model ConnectionSession {
+  id          Int       @id @default(autoincrement())
+  username    String?
+  macAddress  String?
+  ipAddress   String?
+  owner       String?   @db.VarChar(150)
+  type        String    // "VPN", "DHCP"
+  vpnProfile  String?   @db.VarChar(100) // VPN profile/organization, e.g. "nueva-eps"
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+  rxBytes     BigInt?
+  txBytes     BigInt?
+  location    String?   @db.VarChar(100)
+
+  @@index([startedAt, endedAt])
+}

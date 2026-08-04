@@ -1,0 +1,290 @@
+@import "tailwindcss";
+
+/* Custom dark variant handled via CSS variables below */
+
+/* ── Dark mode (default) CSS variables ─────────────────────────────── */
+:root {
+  --bg-base: #050914;
+  --bg-surface: rgba(13, 21, 38, 0.75);
+  --bg-panel: rgba(17, 24, 39, 0.85);
+  --bg-muted: #0a1020;
+  --bg-card: rgba(19, 30, 50, 0.7);
+  --bg-card-hover: rgba(24, 36, 64, 0.9);
+  --text-primary: #f0f4ff;
+  --text-secondary: #8899b4;
+  --text-muted: #4f6282;
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-accent: rgba(99, 102, 241, 0.4);
+  --border-hover: rgba(99, 102, 241, 0.6);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.4);
+
+  /* Accents */
+  --accent-indigo: #6366f1;
+  --accent-blue: #3b82f6;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-purple: #8b5cf6;
+
+  /* Vibrant Gradients for Dark Mode */
+  --grad1: rgba(99, 102, 241, 0.25);
+  --grad2: rgba(59, 130, 246, 0.20);
+  --grad3: rgba(168, 85, 247, 0.18);
+}
+
+/* ── Light mode CSS variables ───────────────────────────────────────── */
+.light {
+  --bg-base: #f8fafc;
+  --bg-surface: rgba(255, 255, 255, 0.6);
+  --bg-panel: rgba(255, 255, 255, 0.85);
+  --bg-muted: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-default: rgba(15, 23, 42, 0.12);
+  --border-subtle: rgba(15, 23, 42, 0.06);
+  --border-accent: rgba(99, 102, 241, 0.5);
+  --border-hover: rgba(99, 102, 241, 0.7);
+  --scrollbar-thumb: rgba(15, 23, 42, 0.15);
+  --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+  --shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(99, 102, 241, 0.4);
+
+  /* Vibrant Gradients for Light Mode */
+  --grad1: rgba(99, 102, 241, 0.20);
+  --grad2: rgba(59, 130, 246, 0.15);
+  --grad3: rgba(168, 85, 247, 0.15);
+}
+
+/* ── Body & Root Layout ─────────────────────────────────────────────── */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: auto;
+}
+
+body {
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(ellipse 60% 50% at 10% 0%, var(--grad1) 0%, transparent 100%),
+    radial-gradient(ellipse 50% 60% at 90% 100%, var(--grad2) 0%, transparent 100%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, var(--grad3) 0%, transparent 100%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* ── Page wrapper ────────────────────────────────────────────────────── */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Full‑screen utility – apply to any root element */
+.full-screen {
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+  background: var(--bg-base);
+}
+
+.page-content {
+  flex: 1;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 2rem;
+}
+
+/* ── Responsive grids ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .charts-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .bottom-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Glass Panel (header, dialogs) ───────────────────────────────────── */
+.glass-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
+  border-radius: 0.875rem;
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 0.875rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease, background 0.35s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-accent);
+}
+
+/* ── KPI Card variant (interactive hover) ────────────────────────────── */
+.card-kpi {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 0.875rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease, background 0.35s ease;
+  cursor: default;
+}
+
+.card-kpi:hover {
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  background: var(--bg-card-hover);
+}
+
+/* ── glass-card backward compat alias ───────────────────────────────── */
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 0.875rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease, background 0.35s ease;
+}
+
+.glass-card:hover {
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-accent);
+  transform: translateY(-1px);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-default);
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: background 0.35s ease;
+}
+
+/* ── Dividers ────────────────────────────────────────────────────────── */
+.divider {
+  border-top: 1px solid var(--border-default);
+}
+
+/* ── Scrollbars ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb);
+  filter: brightness(1.5);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 2px;
+}
+
+/* ── Status dot ─────────────────────────────────────────────────────── */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 4px currentColor;
+  }
+
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 10px currentColor;
+  }
+}
+
+/* ── Animations ──────────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out both;
+}
+
+/* ── Theme transition for all elements ───────────────────────────────── */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* Exclude animations from the blanket transition */
+.animate-ping,
+.animate-pulse,
+.animate-spin,
+.animate-fade-in {
+  transition: none !important;
+}
