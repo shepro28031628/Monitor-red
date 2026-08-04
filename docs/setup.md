@@ -1,26 +1,55 @@
 # Guía de Configuración y Despliegue
 
-## Prerrequisitos
-- Node.js (v20 o superior recomendado)
-- PostgreSQL
-- Redis (para BullMQ y colas de procesos)
-- Router MikroTik accesible para `node-routeros`
+La puesta en marcha del proyecto involucra preparar la base de datos, configurar las integraciones (MikroTik, Jira, SMTP) y levantar el servidor de Node.js.
 
-## Configuración del Entorno
-1. Copiar el archivo `.env.example` a `.env` si existe (o usar las variables actuales de `.env`).
-2. Configurar la cadena de conexión de la base de datos (`DATABASE_URL`).
-3. Configurar la URL de conexión a Redis (`REDIS_URL`).
-4. Configurar las credenciales de acceso al Router MikroTik.
+## Diagrama de Flujo de Despliegue (UML)
 
-## Comandos Disponibles
+```mermaid
+stateDiagram-v2
+    [*] --> Clonar_Repositorio
+    Clonar_Repositorio --> Instalar_Dependencias : npm install
+    
+    Instalar_Dependencias --> Configurar_Entorno
+    note right of Configurar_Entorno
+      cp .env.example .env
+      Configurar PostgreSQL
+      Configurar IP y Pass MikroTik
+    end note
+    
+    Configurar_Entorno --> Preparar_BD : npx prisma db push
+    Preparar_BD --> Poblar_Datos : npx prisma db seed
+    
+    Poblar_Datos --> Levantar_Aplicacion
+    
+    state Levantar_Aplicacion {
+        direction LR
+        NextJS_Server
+        Telemetry_Worker
+    }
+    
+    Levantar_Aplicacion --> [*]
+```
 
-- `npm run dev`: Inicia el entorno de desarrollo concurrente, incluyendo la aplicación Next.js en el puerto 3000 y los workers (`worker/telemetry.ts`).
-- `npm run build`: Construye la aplicación Next.js para producción.
-- `npm run start`: Inicia la aplicación Next.js en entorno de producción.
-- `npm run worker`: Inicia el worker de telemetría por separado (útil para despliegues desacoplados).
-- `npm run lint`: Ejecuta el linter ESLint.
+## Prerrequisitos de Infraestructura
 
-## Base de datos (Prisma)
-- Generar el cliente: `npx prisma generate`
-- Empujar los esquemas a la BD (desarrollo): `npx prisma db push`
-- Poblar datos (Seed): `npx prisma db seed` (Ejecuta `prisma/seed.ts` vía `tsx`)
+Para garantizar el funcionamiento óptimo de este monitor en producción, se recomienda:
+1. **Base de Datos**: PostgreSQL >= 13.
+2. **Caché/Colas**: Redis (necesario para el módulo de reintentos de colas de correos y para emitir eventos en vivo sin tocar la BD).
+3. **Router**: MikroTik corriendo RouterOS con el servicio de `api` (puerto 8728) o `api-ssl` habilitado en `IP > Services`.
+
+## Compilación para Producción
+
+Si deseas ejecutar la aplicación en un servidor productivo (en lugar del entorno de desarrollo que utiliza `npm run dev`), deberás compilar la aplicación de Next.js:
+
+```bash
+# 1. Compilar Next.js
+npm run build
+
+# 2. Iniciar en modo producción
+npm run start
+
+# 3. En una ventana o proceso paralelo, correr el recolector de métricas
+npm run worker
+```
+
+**Nota para Producción**: Se recomienda utilizar un gestor de procesos como `PM2` o correr la plataforma en contenedores **Docker** para garantizar que tanto la web de Next.js como el archivo `worker/telemetry.ts` se reinicien automáticamente en caso de fallos.
