@@ -45,3 +45,5 @@ next-env.d.ts
 # extra
 .live_telemetry.json
 *.json
+*.json
+.live_telemetry.json
