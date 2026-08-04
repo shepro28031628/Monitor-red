@@ -2,40 +2,40 @@
 
 La siguiente documentación describe las acciones e interacciones permitidas para el perfil de Administrador dentro del ecosistema de monitorización.
 
-## Diagrama de Casos de Uso (UML)
+## Diagrama de Casos de Uso (UML adaptado)
+
+*Nota: Dado que Mermaid no soporta diagramas de casos de uso de forma nativa en GitHub, este diagrama se modela utilizando un Flowchart direccional.*
 
 ```mermaid
-usecaseDiagram
-    actor Administrador as Admin
-    
-    package "REN MikroTik Monitor" {
-        usecase "Iniciar Sesión" as UC1
-        usecase "Visualizar Dashboard (Tiempo Real)" as UC2
-        usecase "Consultar Inventario (Jira)" as UC3
-        usecase "Revisar Auditoría (VPN/DHCP)" as UC4
-        usecase "Gestionar Reglas de Alertas" as UC5
-        usecase "Recibir Alertas SMTP" as UC6
-    }
-    
-    package "Sistemas Externos" {
-        actor "RouterOS" as Router
-        actor "Mail Server" as SMTP
-    }
-    
+flowchart LR
+    %% Actores
+    Admin([Administrador])
+    Router[[RouterOS]]
+    SMTP[[Mail Server]]
+
+    %% Casos de Uso
+    UC1(Iniciar Sesión)
+    UC2(Visualizar Dashboard)
+    UC3(Consultar Inventario Jira)
+    UC4(Revisar Auditoría VPN/DHCP)
+    UC5(Gestionar Reglas de Alertas)
+    UC6(Recibir Notificaciones)
+
+    %% Relaciones
     Admin --> UC1
     Admin --> UC2
     Admin --> UC3
     Admin --> UC4
     Admin --> UC5
+    Admin -.-> UC6
     
-    UC2 .> UC1 : <<include>>
-    UC4 .> UC3 : <<extend>>
+    UC2 -.->|include| UC1
+    UC4 -.->|extend| UC3
     
-    Router --> UC2 : Provee métricas
-    Router --> UC4 : Provee logs de conexión
+    Router -->|Provee métricas| UC2
+    Router -->|Provee logs| UC4
     
-    SMTP --> UC6 : Entrega Notificaciones Críticas
-    UC6 <-- Admin : Lee las alertas
+    SMTP -->|Envía Alertas| UC6
 ```
 
 ## Detalles de los Casos de Uso Principales

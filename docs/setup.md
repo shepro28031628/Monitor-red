@@ -33,6 +33,7 @@ stateDiagram-v2
 ## Prerrequisitos de Infraestructura
 
 Para garantizar el funcionamiento óptimo de este monitor en producción, se recomienda:
+
 1. **Base de Datos**: PostgreSQL >= 13.
 2. **Caché/Colas**: Redis (necesario para el módulo de reintentos de colas de correos y para emitir eventos en vivo sin tocar la BD).
 3. **Router**: MikroTik corriendo RouterOS con el servicio de `api` (puerto 8728) o `api-ssl` habilitado en `IP > Services`.

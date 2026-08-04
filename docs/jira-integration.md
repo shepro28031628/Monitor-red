@@ -31,6 +31,7 @@ flowchart TD
 ## Configuración Requerida
 
 Para que este proceso (Flowchart) se ejecute correctamente, el archivo `.env` debe incluir las variables de entorno relacionadas con Atlassian:
+
 - `JIRA_EMAIL`
 - `JIRA_API_TOKEN`
 - `JIRA_WORKSPACE_ID`
