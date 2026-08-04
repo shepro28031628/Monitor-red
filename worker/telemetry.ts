@@ -371,7 +371,7 @@ async function collectFromRouter(): Promise<TelemetrySnapshot> {
         }
       }
 
-      cachedVpnProfilesDetail = list;
+      cachedVpnProfilesDetail = list.filter((vpn) => vpn.connected);
       cachedVpnCount = list.filter(v => v.connected).length;
       await trackVpnSessions(list);
     } catch (err) { logError("Error al consultar PPP secrets/active", err); }
