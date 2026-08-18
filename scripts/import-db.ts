@@ -29,13 +29,23 @@ try {
   const port = parsedUrl.port || "5432";
   const dbName = parsedUrl.pathname.replace(/^\//, "").split("?")[0];
 
-  console.log(`📥 Restaurando base de datos '${dbName}' desde '${inputFile}'...`);
+  console.log(`📥 Preparando restauración de base de datos '${dbName}' desde '${inputFile}'...`);
 
   const envVars = { ...process.env, PGPASSWORD: password };
+
+  // Crear la base de datos si no existe en el servidor destino
+  try {
+    const createDbCmd = `psql -h ${host} -p ${port} -U ${user} -d postgres -c "CREATE DATABASE \\"${dbName}\\";"`;
+    execSync(createDbCmd, { env: envVars, stdio: "ignore" });
+    console.log(`⚙️ Base de datos '${dbName}' creada automáticamente.`);
+  } catch (_e) {
+    // Si la BD ya existe o ya fue creada, ignoramos la excepción y procedemos
+  }
+
   const command = `psql -h ${host} -p ${port} -U ${user} -d ${dbName} -f "${inputFile}"`;
 
   execSync(command, { env: envVars, stdio: "inherit" });
-  console.log("✅ Restauración completada exitosamente.");
+  console.log("✅ Restauración y réplica completada exitosamente.");
 } catch (error: any) {
   console.error("❌ Error al importar la base de datos:", error.message || error);
   console.log("\n💡 Asegúrate de tener psql instalado en tu sistema y accesible en la variable PATH.");

@@ -42,9 +42,15 @@ La documentación detallada se encuentra estructurada dentro de la carpeta [`doc
 
 Sigue estos pasos para replicar e iniciar el proyecto en cualquier otro equipo o entorno local:
 
-### 1. Requerimientos e Instalación de Dependencias
+### 1. Requerimientos del Sistema e Instalación de Dependencias
 
-Este proyecto utiliza **Node.js (v18+)** y **npm**. Toda la lista de dependencias y módulos requeridos ("requirements") se encuentra definida en el archivo [`package.json`](./package.json).
+Antes de iniciar, asegúrate de contar con los siguientes prerrequisitos instalados en el sistema:
+
+- 🟢 **Node.js (v18+)** y **npm**
+- 🐘 **PostgreSQL (v14+)** con las herramientas cliente (`pg_dump` y `psql`) incluidas en la variable de entorno `PATH` del sistema.
+- 🔴 **Redis** *(Recomendado para la gestión de colas BullMQ y telemetría en tiempo real)*.
+
+Toda la lista de dependencias de la aplicación se encuentra definida en el archivo [`package.json`](./package.json).
 
 ```bash
 # Clonar el repositorio
@@ -70,47 +76,64 @@ Abre el archivo `.env` recién creado en tu editor de código y ajusta los pará
 
 ---
 
-### 3. Replicar la Base de Datos PostgreSQL
+### 3. Replicar la Base de Datos PostgreSQL en Otro Equipo
 
-Tienes **dos opciones** según lo que necesites al llevar el proyecto a otro equipo:
+Para desplegar y replicar la base de datos en un nuevo equipo, tienes dos alternativas automáticas:
 
-#### 🔹 Opción A: Base de datos limpia con usuario inicial (Recomendado para nuevas instalaciones)
-Construye las tablas en PostgreSQL según el esquema de Prisma y genera el usuario `admin` por defecto:
+#### 🔹 Opción A: Migración Completa y Réplica con Datos (Recomendado)
+Para transferir la base de datos exacta con todo su historial (métricas, dispositivos, usuarios y configuración):
+
+1. **En el equipo de origen (exportar datos):**
+   ```bash
+   npm run db:export
+   ```
+   *Esto generará automáticamente el archivo de respaldo `backup.sql` en la raíz del proyecto.*
+
+2. **Copiar `backup.sql` al nuevo equipo** (vía USB, carpeta compartida, red o Git).
+
+3. **En el equipo de destino (importación automática):**
+   Asegúrate de configurar la variable `DATABASE_URL` en tu `.env` del nuevo equipo y ejecuta:
+   ```bash
+   npm run db:import
+   ```
+   *El script creará automáticamente la base de datos si aún no existe en el servidor PostgreSQL de destino y restaurará todo el esquema y los datos sin intervención manual.*
+
+#### 🔹 Opción B: Nueva Instalación Limpia
+Si prefieres iniciar desde cero creando la estructura y el usuario administrador por defecto (`admin`):
 
 ```bash
 npm run db:setup
 ```
-*(O equivalente manual: `npx prisma db push && npx prisma db seed`)*
-
-#### 🔹 Opción B: Migrar base de datos existente con TODOS sus registros (Backup & Restore SQL)
-Si deseas transferir toda la información almacenada (historial de métricas, inventario, logs, etc.) desde tu equipo actual hacia el nuevo equipo:
-
-1. **En el equipo de origen (exportar):**
-   ```bash
-   npm run db:export
-   ```
-   *Esto creará un archivo `backup.sql` en la raíz del proyecto.*
-
-2. **Copiar `backup.sql` al nuevo equipo** (vía USB, red o Git/Drive).
-
-3. **En el equipo de destino (importar):**
-   ```bash
-   npm run db:import
-   ```
-   *Esto cargará todo el esquema y los datos del dump en la base de datos PostgreSQL del nuevo equipo.*
+*(Crea las tablas mediante Prisma y ejecuta el seed inicial).*
 
 ---
 
-### 🛠️ Comandos Útiles de Base de Datos
+### 🛠️ Comandos Útiles de Base de Datos y Aplicación
 
 | Comando | Descripción |
 | :--- | :--- |
-| `npm run db:setup` | Crea las tablas en PostgreSQL y ejecuta el seed inicial |
-| `npm run db:push` | Sincroniza la estructura del modelo Prisma en PostgreSQL |
-| `npm run db:seed` | Registra los datos semilla iniciales (crea el usuario admin) |
+| `npm run dev` | Inicia el servidor de desarrollo (Next.js) y el recolector de telemetría (Worker) simultáneamente |
+| `npm run build` | Compila la aplicación Next.js para producción |
+| `npm run worker` | Ejecuta de manera independiente únicamente el worker de telemetría |
+| `npm run db:export` | Exporta un respaldo completo de la BD a `backup.sql` |
+| `npm run db:import` | Crea la BD destino (si no existe) e importa automáticamente `backup.sql` |
+| `npm run db:setup` | Crea la estructura de tablas en PostgreSQL y ejecuta el seed inicial |
+| `npm run db:push` | Sincroniza la estructura del esquema Prisma en PostgreSQL |
+| `npm run db:seed` | Registra los datos iniciales por defecto (crea el usuario admin) |
 | `npm run db:studio` | Abre una interfaz web gráfica (Prisma Studio) para explorar la BD |
-| `npm run db:export` | Exporta un respaldo completo de la BD a `backup.sql` (`pg_dump`) |
-| `npm run db:import` | Importa el archivo `backup.sql` en la BD (`psql`) |
+
+---
+
+### 🔧 Solución de Problemas Frecuentes (Troubleshooting)
+
+#### ❌ Error: `pg_dump` o `psql` no se reconoce como un comando interno o externo
+**Causa:** Las herramientas CLI de PostgreSQL no están agregadas a las variables de entorno del sistema (`PATH`).
+**Solución (Windows):**
+1. Agrega la ruta de instalación de PostgreSQL a la variable `PATH` de tu sistema (Ej: `C:\Program Files\PostgreSQL\16\bin`).
+2. Reinicia la terminal o editor de código (VS Code) para aplicar los cambios.
+
+#### ❌ Error al conectar con PostgreSQL (`DATABASE_URL`)
+**Solución:** Verifica que el servicio de PostgreSQL esté en ejecución (`services.msc` en Windows o `sudo systemctl status postgresql` en Linux) y que el usuario y la contraseña definidos en `.env` tengan permisos suficientes.
 
 ---
 
@@ -123,8 +146,6 @@ npm run dev
 ```
 
 El Dashboard estará disponible en [**http://localhost:3000**](http://localhost:3000).
-
-> **Nota:** Para que las alertas por correo y las actualizaciones en tiempo real funcionen al máximo de su capacidad en producción, se recomienda contar con una instancia local de **Redis**.
 
 ---
 

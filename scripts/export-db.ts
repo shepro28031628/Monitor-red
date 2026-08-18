@@ -24,7 +24,7 @@ try {
   console.log(`📦 Respaldando base de datos '${dbName}' a '${outputFile}'...`);
 
   const envVars = { ...process.env, PGPASSWORD: password };
-  const command = `pg_dump -h ${host} -p ${port} -U ${user} -d ${dbName} -F p -f "${outputFile}"`;
+  const command = `pg_dump -h ${host} -p ${port} -U ${user} -d ${dbName} --clean --if-exists -F p -f "${outputFile}"`;
 
   execSync(command, { env: envVars, stdio: "inherit" });
   console.log("✅ Respaldo completado exitosamente en backup.sql");
