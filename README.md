@@ -38,42 +38,85 @@ La documentación detallada se encuentra estructurada dentro de la carpeta [`doc
 
 ---
 
-## 🚀 Guía Rápida de Instalación (Desarrollo)
+## 🚀 Guía Rápida de Instalación y Replicación
 
-Sigue estos pasos para replicar e iniciar el proyecto en tu entorno local:
+Sigue estos pasos para replicar e iniciar el proyecto en cualquier otro equipo o entorno local:
 
-### 1. Clonar e instalar dependencias
+### 1. Requerimientos e Instalación de Dependencias
+
+Este proyecto utiliza **Node.js (v18+)** y **npm**. Toda la lista de dependencias y módulos requeridos ("requirements") se encuentra definida en el archivo [`package.json`](./package.json).
 
 ```bash
+# Clonar el repositorio
 git clone https://github.com/TU-USUARIO/Monitor-red.git
 cd Monitor-red
+
+# Instalar todas las dependencias necesarias
 npm install
 ```
 
-### 2. Configurar el Entorno
+---
+
+### 2. Configurar las Variables de Entorno
 
 Copia la plantilla de variables de entorno segura y renómbrala a `.env`:
 
 ```bash
 cp .env.example .env
 ```
-Abre el archivo `.env` recién creado en tu editor y configura tus credenciales reales (Conexión a PostgreSQL, credenciales del Router MikroTik, y accesos SMTP).
+Abre el archivo `.env` recién creado en tu editor de código y ajusta los parámetros de conexión:
+- `DATABASE_URL`: Cadena de conexión a PostgreSQL (Ej: `postgresql://usuario:password@localhost:5432/monitor_red?schema=public`).
+- Credenciales del Router MikroTik y configuración SMTP.
 
-### 3. Preparar la Base de Datos
+---
 
-Migra la estructura a tu motor de bases de datos PostgreSQL y crea el usuario administrador por defecto:
+### 3. Replicar la Base de Datos PostgreSQL
+
+Tienes **dos opciones** según lo que necesites al llevar el proyecto a otro equipo:
+
+#### 🔹 Opción A: Base de datos limpia con usuario inicial (Recomendado para nuevas instalaciones)
+Construye las tablas en PostgreSQL según el esquema de Prisma y genera el usuario `admin` por defecto:
 
 ```bash
-# Construir las tablas (Prisma Schema Push)
-npx prisma db push
-
-# Poblar la base de datos (Creará el usuario "admin")
-npx prisma db seed
+npm run db:setup
 ```
+*(O equivalente manual: `npx prisma db push && npx prisma db seed`)*
+
+#### 🔹 Opción B: Migrar base de datos existente con TODOS sus registros (Backup & Restore SQL)
+Si deseas transferir toda la información almacenada (historial de métricas, inventario, logs, etc.) desde tu equipo actual hacia el nuevo equipo:
+
+1. **En el equipo de origen (exportar):**
+   ```bash
+   npm run db:export
+   ```
+   *Esto creará un archivo `backup.sql` en la raíz del proyecto.*
+
+2. **Copiar `backup.sql` al nuevo equipo** (vía USB, red o Git/Drive).
+
+3. **En el equipo de destino (importar):**
+   ```bash
+   npm run db:import
+   ```
+   *Esto cargará todo el esquema y los datos del dump en la base de datos PostgreSQL del nuevo equipo.*
+
+---
+
+### 🛠️ Comandos Útiles de Base de Datos
+
+| Comando | Descripción |
+| :--- | :--- |
+| `npm run db:setup` | Crea las tablas en PostgreSQL y ejecuta el seed inicial |
+| `npm run db:push` | Sincroniza la estructura del modelo Prisma en PostgreSQL |
+| `npm run db:seed` | Registra los datos semilla iniciales (crea el usuario admin) |
+| `npm run db:studio` | Abre una interfaz web gráfica (Prisma Studio) para explorar la BD |
+| `npm run db:export` | Exporta un respaldo completo de la BD a `backup.sql` (`pg_dump`) |
+| `npm run db:import` | Importa el archivo `backup.sql` en la BD (`psql`) |
+
+---
 
 ### 4. Ejecutar la Aplicación
 
-El siguiente comando levantará simultáneamente el entorno web (Next.js) y el recolector de telemetría (Worker) usando `concurrently`:
+El siguiente comando levantará simultáneamente el panel web (Next.js en puerto 3000) y el recolector de telemetría (Worker):
 
 ```bash
 npm run dev
